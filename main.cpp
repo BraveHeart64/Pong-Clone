@@ -18,13 +18,39 @@ class Ball{
 };
 
 class Player{
-    int y = 50;
-    int x = 10;
-
+    float y = 50.5;
+    float x = 3.5;
+    const float width = 19;
+    const float height = 101;
     bool down, up;
 
 
     public:
+        bool Overlap(float spone_min, float spone_max,float sptwo_min, float sptwo_max){
+
+            if(spone_min <= sptwo_max && sptwo_min <= spone_max){
+                return true;
+            }else{
+              return false;
+            }
+        }
+
+        bool Collide(Player one, Player two){
+            float   one_left = one.GetX();
+            float   one_right = one_left + one.GetHeight();
+            float   two_left = two.GetX();
+            float   two_right = two_left + two.GetHeight();
+
+            float   one_bottom = one.GetY();
+            float   one_top = one_bottom + two.GetY();
+            float   two_bottom = two.GetY();
+            float   two_top = two_bottom + two.GetY();
+
+            return Overlap(one_left,one_right,two_left,two_right) &&
+            Overlap(one_bottom,one_top ,two_bottom ,two_top);
+
+        }
+
         void Boundry(){
             if(this->y >=402){ // keeps paddle from going to low off screen
                 this->y = this->y -5;
@@ -42,6 +68,11 @@ class Player{
 
         int GetY(){
             return this->y;
+        }
+
+        int GetHeight(){
+            return this->height;
+
         }
 
         void PressedDown(){
@@ -206,7 +237,7 @@ int main(int argc, char* argv[]){
             p_one.Boundry();
             //al_draw_bitmap(player_one,10,50,1);
              al_draw_bitmap(player_one,p_one.GetX(),p_one.GetY(),1);
-            al_draw_bitmap(player_two,470,50,1);
+            al_draw_bitmap(player_two,478,50,1);
             al_draw_bitmap(ball,250,50,1);
 
 
