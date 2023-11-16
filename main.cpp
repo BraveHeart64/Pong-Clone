@@ -530,16 +530,8 @@ string name = "Paddle.png";
 
             p_one->SetHit(col.Collsion(p_one,ball));
             p_two->SetHit( col.Collsion(p_two,ball));
-           // ball->BallPath(p_one->GetHit());
-            /*
-                    Suggestion to fixing the code we are overwriting it thats the error
-
-                bool collision_p1 = col.Collsion(p_one, ball);
-                bool collision_p2 = col.Collsion(p_two, ball);
-
-                ball->SetHit(collision_p1 || collision_p2);
-
-            */
+          
+          
 
 
             al_draw_bitmap(ball->GetImage(),ball->BallPath(p_one->GetHit(),p_two->GetHit()),50,1);//250
