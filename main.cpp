@@ -16,10 +16,10 @@ using namespace std;
 
 class Sprite{
 
-    int x ,y;
+    int x ,y,hit;
     float height, width;
     float boudingbox_x, boudingbox_y;
-     bool down, up, hit;
+     bool down, up;
 
 
     public:
@@ -30,13 +30,24 @@ class Sprite{
 
         }
 
+
+
+           void SetHit(int h){
+                this->hit = h;
+
+        }
+
+            int GetHit(){
+                return this->hit;
+            }
+
           void Boundry(){
             if(this->y >=460){ // keeps paddle from going to low off screen
                 this->y = this->y -5;
 
             }
 
-            if(this->y <= 35){
+            if(this->y <= 45){
                 this->y = this->y +5;
                // cout<< this->y;
 
@@ -114,14 +125,13 @@ class Sprite{
 
         // Sprite(int x1, int y1, float width1, float height1){
         Sprite(string name, int x1, int y1){
-            cout<<"create";
+
             image = al_load_bitmap(name.c_str());
             x = x1;
             y = y1;
-            width = al_get_bitmap_width(image)-3;//-3
+            width = al_get_bitmap_width(image);//-3
             height = al_get_bitmap_height(image)-50;//-50
-           // cout<< "Height: "<<height<<endl;
-          //  cout<< "width: " <<width;
+
             down = false;
             up = false;
             hit = false;
@@ -134,7 +144,7 @@ class Sprite{
                 if(image != 0){
                    al_destroy_bitmap(this->image);
                 }
-                cout<<"Destroyed ";
+
         }
 
 };
@@ -142,9 +152,11 @@ class Sprite{
 
 class Ball{
     private:
-        bool hit;
-        int x = 250;
-        int y = 50;
+        int hit = 0;
+        int dir = 0;
+        int angle = 0;
+        int x = 250;//250
+        int y = 50;//50
         int x_width, y_height;
         float height;
         float width;
@@ -160,9 +172,12 @@ class Ball{
         return this->image;
     }
 
-        bool SetHit(bool h){
+        void SetHit(int h){
                 this->hit = h;
 
+        }
+
+        bool GetHit(){
             return this->hit;
         }
 
@@ -196,111 +211,192 @@ class Ball{
 
         }
 
-
-        int BallPath(){ // 250 start out
-            if(hit == false){
+        void Contact(bool rightpaddle, bool left_paddle){
 
 
-             // x = x - 15;
-             x = x - 1;
-            }else if(hit == true){
+        }
 
-               // x =50;
-                cout<<"Hit occured"<<endl;
+
+        int BallPath(int con_one,int con_two){ // 250 start out
+
+
+             if(con_one == 1 && dir == 0){
+                dir = 1;
+                con_one = 0;
+
+            }
+             if(con_two == 1 && dir == 1){
+
+               dir = 0;
+                con_two = 0;
             }
 
+
+            if(dir == 0){
+                x=x-1;
+
+            }
+            else if(dir == 1){
+                x=x + 1;
+            }
+
+
+
+            /*
+            if(hit == 1 && dir == 0){
+                dir = 1;
+                x= x + 3;
+
+            }else if(hit == 1 && dir == 1){
+                dir = 0;
+                x=x -3;
+
+            }
+
+
+
+
+            if(dir == 0){
+              x=x-1;
+            }
+            else if(dir == 1){
+
+                x=x+1;
+            }
+ */
             return x;
         }
 
         Ball(){
             image = al_load_bitmap("Ball.png");
-            this->hit = false;
+
             height = al_get_bitmap_height(image);
             width = al_get_bitmap_width(image);
         }
 
         ~Ball(){
-
+            al_destroy_bitmap(image);
+            delete this;
         }
 
 };
 
 
 class HitDetection{
-    private:
-        bool hit = false;
+
+
 
     public:
-        void Collsion(Sprite *obj1, Ball obj2){
+        int OverLap(float m_one, float max_one, float m_two, float max_two){
 
-            if( obj1->GetX() + obj1->GetWidth() > obj2.GetX() - obj2.GetWidth_x() &&
-                obj1->GetX() - obj1->GetWidth() < obj2.GetX() + obj2.GetWidth_x() &&
-                obj1->GetY()  + obj1->GetHeight()  > obj2.GetY() - obj2.GetHeight_y() &&
-                obj1->GetY() -  (obj1->GetHeight())  < obj2.GetY() + obj2.GetHeight_y()){
+                if(m_two <= max_one && m_one <= max_two){
+                    return 1;
+                }
 
-                    cout<<"Hit";
-                    this->hit = true;
+            return 0;
+
+        }
+
+        int Collsion(Sprite *obj1, Ball* obj2){
+
+
+             //al_draw_filled_rectangle(24+obj2->GetX()  - obj2->GetWidth(),  obj2->GetY() - obj2->GetHeight()+24 , obj2->GetX()  + obj2->GetWidth(), obj2->GetY() + obj2->GetHeight(), al_map_rgba_f(.7, 0, .6, .6));
+
+            float obj1_left =  obj1->GetX();
+            float obj1_right =  obj1_left + obj1->GetWidth()-5;
+            float obj2_left = obj2->GetX();
+            float obj2_right = obj2_left + obj2->GetWidth();
+
+
+
+            float obj1_bottom =  obj1->GetY()-45;
+            float obj1_top =  obj1_bottom + obj1->GetHeight();
+            float obj2_bottom = obj2->GetY();
+            float obj2_top = obj2_bottom  + obj2->GetHeight();
+
+            // al_draw_filled_rectangle(obj1->GetX()  + obj1->GetWidth(),  obj1->GetY() + obj1->GetHeight() , obj1->GetX()  - obj1->GetWidth(), obj1->GetY() - obj1->GetHeight(), al_map_rgba_f(.7, 0, .6, .6));//obj1->GetWidth()+17
+
+
+
+            return OverLap(obj1_left, obj1_right, obj2_left, obj2_right)&&
+            OverLap(obj1_bottom ,obj1_top, obj2_bottom, obj2_top) ;
+        }
+};
+
+
+/*
+
+class HitDetection{
+
+
+
+    public:
+        void Collsion(Sprite *obj1, Ball* obj2){
+
+
+             al_draw_filled_rectangle(obj1->GetX()  + obj1->GetWidth(),  obj1->GetY() + obj1->GetHeight() , obj1->GetX()  - obj1->GetWidth()+15, obj1->GetY() - obj1->GetHeight(), al_map_rgba_f(.7, 0, .6, .6));
+             al_draw_filled_rectangle(24+obj2->GetX()  - obj2->GetWidth(),  obj2->GetY() - obj2->GetHeight()+24 , (obj2->GetX())  + obj2->GetWidth(), obj2->GetY() + obj2->GetHeight(), al_map_rgba_f(.7, 0, .6, .6));
+
+
+            if( obj1->GetX() + obj1->GetWidth() > obj2->GetX() - obj2->GetWidth_x() &&
+                obj1->GetX() - obj1->GetWidth() < obj2->GetX() + obj2->GetWidth_x() &&
+                obj1->GetY()  + obj1->GetHeight()  > obj2->GetY() - obj2->GetHeight_y() &&
+                obj1->GetY() -  (obj1->GetHeight())  < obj2->GetY() + obj2->GetHeight_y()){
+
+                 //obj2->SetHit( true);
+                obj2->SetHit(false);
                 }
                 else{
-                    this->hit = false;
+                   // obj2->SetHit(false);
+
+                obj2->SetHit( true);
                 }
-//44
-            al_draw_filled_rectangle(obj1->GetX()  + obj1->GetWidth(),  obj1->GetY() + obj1->GetHeight() , obj1->GetX()  - obj1->GetWidth()+15, obj1->GetY() - obj1->GetHeight(), al_map_rgba_f(.7, 0, .6, .6));
-             al_draw_filled_rectangle(24+obj2.GetX()  - obj2.GetWidth(),  obj2.GetY() - obj2.GetHeight()+24 , (obj2.GetX())  + obj2.GetWidth(), obj2.GetY() + obj2.GetHeight(), al_map_rgba_f(.7, 0, .6, .6));
-         //   al_draw_filled_rectangle((obj1->GetX()+25)  - obj1->GetWidth_x(), ( obj1->GetY()+100 ) - (obj1->GetHeight_y()+25) , (obj1->GetX()-20)  + obj1->GetWidth_x(), (obj1->GetY()+8) + (obj1->GetHeight_y()-53 ), al_map_rgba_f(.7, 0, .6, .6));
-            //al_draw_filled_rectangle(obj1->GetX()  - obj1->GetWidth(), ( obj1->GetY()+153 ) - obj1->GetHeight() , obj1->GetX()  + obj1->GetWidth(), obj1->GetY() + (obj1->GetHeight()-53 ), al_map_rgba_f(.7, 0, .6, .6));
+
 
         }
 
-
-
-
-
-        bool Contact(){
-
-            return hit;
-        }
 
 
 };
-
-/* I need to figure out how to make this code work for hit detection
- bool Overlap(float spone_min, float spone_max,float sptwo_min, float sptwo_max){
-
-            if(spone_min <= sptwo_max && sptwo_min <= spone_max){
-                return true;
-            }else{
-              return false;
-            }
-        }
-
-        bool Collide(Player one, Ball two){
-            float   one_left = one.GetX();
-            float   one_right = one_left + one.GetHeight();
-            float   two_left = two.GetX();
-            float   two_right = two_left + two.GetHeight();
-
-            float   one_bottom = one.GetY();
-            float   one_top = one_bottom + two.GetY();
-            float   two_bottom = two.GetY();
-            float   two_top = two_bottom + two.GetY();
-
-            return Overlap(one_left,one_right,two_left,two_right) &&
-            Overlap(one_bottom,one_top ,two_bottom ,two_top);
-
-        }
 
 */
 
 
 
+/*
+
+        int Collsion(Sprite *obj1, Ball* obj2){
+
+                //obj1->GetWidth()+15
+             al_draw_filled_rectangle(obj1->GetX()  + obj1->GetWidth(),  obj1->GetY() + obj1->GetHeight() , obj1->GetX()  - obj1->GetWidth()+17, obj1->GetY() - obj1->GetHeight(), al_map_rgba_f(.7, 0, .6, .6));
+             al_draw_filled_rectangle(24+obj2->GetX()  - obj2->GetWidth(),  obj2->GetY() - obj2->GetHeight()+24 , obj2->GetX()  + obj2->GetWidth(), obj2->GetY() + obj2->GetHeight(), al_map_rgba_f(.7, 0, .6, .6));
+
+            float obj1_left =  obj1->GetX();
+            float obj1_right =  obj1_left + obj1->GetWidth()+17;
+            float obj2_left = obj2->GetX()+24;
+            float obj2_right = obj2_left + obj2->GetWidth();
+
+
+
+            float obj1_bottom =  obj1->GetY();
+            float obj1_top =  obj1_bottom + obj1->GetHeight();
+            float obj2_bottom = obj2->GetY();
+            float obj2_top = obj2_bottom  + obj2->GetHeight()+24;
 
 
 
 
+            return OverLap(obj1_left, obj1_right, obj2_left, obj2_right)&&
+            OverLap(obj1_bottom ,obj1_top, obj2_bottom, obj2_top) ;
+        }
+};
+
+
+*/
 int main(int argc, char* argv[]){
 
 string name = "Paddle.png";
+
     HitDetection col;
 
 
@@ -316,9 +412,9 @@ string name = "Paddle.png";
 
    // Sprite* p_one = new  Sprite(name,3,50);
     Sprite* p_one = new  Sprite(name,3,150);
-    Sprite* p_two = new  Sprite(name,478,150);
 
-    Ball ball;
+    Sprite* p_two = new  Sprite(name,478,50);
+    Ball* ball = new Ball();
 
     ALLEGRO_TIMER* gameclock;
     double fps = 60.0;
@@ -419,17 +515,34 @@ string name = "Paddle.png";
             al_clear_to_color(al_map_rgb(135,206,235));
             p_one->MovePlayer();
             p_one->Boundry();
+                //ball.SetHit(true);
             //al_draw_bitmap(player_one,10,50,1);
-            al_draw_bitmap(player_one,p_one->GetX(),p_one->GetY()-50,1);
-            al_draw_bitmap(player_two,p_two->GetX()-5,p_two->GetY()-50,1);
-            al_draw_bitmap(ball.GetImage(),ball.BallPath(),50,1);//250
 
-            //p_one.SetHit(p_one.Collide(p_one, ball));
-           // p_two.SetHit(p_two.Collide(p_two, ball));
-           //  ball.SetHit(p_one.Collide(p_one, ball));
 
-            col.Collsion(p_one,ball);
-            col.Collsion(p_two,ball);
+
+
+
+
+
+
+            al_draw_bitmap(player_one,p_one->GetX(),p_one->GetY()-51,1);
+            al_draw_bitmap(player_two,p_two->GetX()-5,p_two->GetY()-51,1);
+
+            p_one->SetHit(col.Collsion(p_one,ball));
+            p_two->SetHit( col.Collsion(p_two,ball));
+           // ball->BallPath(p_one->GetHit());
+            /*
+                    Suggestion to fixing the code we are overwriting it thats the error
+
+                bool collision_p1 = col.Collsion(p_one, ball);
+                bool collision_p2 = col.Collsion(p_two, ball);
+
+                ball->SetHit(collision_p1 || collision_p2);
+
+            */
+
+
+            al_draw_bitmap(ball->GetImage(),ball->BallPath(p_one->GetHit(),p_two->GetHit()),50,1);//250
 
 
             al_flip_display();
@@ -448,9 +561,10 @@ string name = "Paddle.png";
 
     al_destroy_event_queue(que);
     //al_destroy_bitmap(img_ball);
-     al_destroy_bitmap(ball.GetImage());
+     al_destroy_bitmap(ball->GetImage());
     al_destroy_display(screen);
     delete p_one;
     delete p_two;
+
     return 0;
 }
