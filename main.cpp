@@ -1,4 +1,5 @@
 #include<iostream>
+#include<math.h>
 #include"allegro5/alcompat.h"
 #include"allegro5/allegro_image.h"
 #include"allegro5/allegro_audio.h"
@@ -16,10 +17,11 @@ using namespace std;
 
 class Sprite{
 
-    int x ,y,hit;
+    float x ,y;
+    float vel;
+    int hit;
     float height, width;
-    float boudingbox_x, boudingbox_y;
-     bool down, up;
+    bool down, up;
 
 
     public:
@@ -65,13 +67,76 @@ class Sprite{
 
         }
 
+        void PlayerVelocityUp(){
+            this->vel= this->vel - 0.5;
+
+            if(this->vel <= -1.5){
+                this->y = this->y-1.1;
+            }
+            else if(this->vel <= -2.5){
+                this->y = this->y-2.1;
+            }
+            else if(this->vel <= -5.0){
+
+                this->y = this->y -5.5;
+            }
+              if(this->vel <= -5.5){
+                this->vel = -5.5;
+            }
+
+        }
+
+
+
+
+        void PlayerVelocityDown(){
+            this->vel= this->vel + 0.5;
+
+            if(this->vel >= 1.5){
+                this->y = this->y+1.1;
+            }
+            else if(this->vel >=  2.5){
+                this->y = this->y+2.1;
+            }
+            else if(this->vel >5.0){
+
+                this->vel =this->vel + 5.5;
+            }
+
+            if(this->vel >= 5.5){
+                this->vel = 5.5;
+            }
+
+
+        }
+
+        void Idle(){
+
+            if(this->vel > 0.0){
+                this->vel = this->vel -0.5;
+            }
+            else if(this->vel < 0.0){
+                this->vel = this->vel +0.5;
+            }
+             cout<<this->vel<<endl;
+        }
+
+
         int MovePlayer(){
+             cout<<this->vel<<endl;
             if(up == true){
-              return  this->y = this->y -5;
+
+               PlayerVelocityUp();
+
+             // return  this->y = this->y -5;
+              return 1;
             }
             else if(down == true){
-                return this->y = this->y + 5;
+                PlayerVelocityDown();
+               // return this->y = this->y + 5;
+                return 1;
             }
+            Idle();
             return this->y;
 
         }
@@ -129,6 +194,7 @@ class Sprite{
             image = al_load_bitmap(name.c_str());
             x = x1;
             y = y1;
+            this->vel = 0.0;
             width = al_get_bitmap_width(image);//-3
             height = al_get_bitmap_height(image)-50;//-50
 
@@ -154,9 +220,9 @@ class Ball{
     private:
         int hit = 0;
         int dir = 0;
-        int angle = 0;
-        int x = 250;//250
-        int y = 50;//50
+        float angle = 0;
+        float x = 250;//250
+        float y = 50;//50
         int x_width, y_height;
         float height;
         float width;
@@ -241,29 +307,6 @@ class Ball{
             }
 
 
-
-            /*
-            if(hit == 1 && dir == 0){
-                dir = 1;
-                x= x + 3;
-
-            }else if(hit == 1 && dir == 1){
-                dir = 0;
-                x=x -3;
-
-            }
-
-
-
-
-            if(dir == 0){
-              x=x-1;
-            }
-            else if(dir == 1){
-
-                x=x+1;
-            }
- */
             return x;
         }
 
@@ -530,8 +573,16 @@ string name = "Paddle.png";
 
             p_one->SetHit(col.Collsion(p_one,ball));
             p_two->SetHit( col.Collsion(p_two,ball));
-          
-          
+           // ball->BallPath(p_one->GetHit());
+            /*
+                    Suggestion to fixing the code we are overwriting it thats the error
+
+                bool collision_p1 = col.Collsion(p_one, ball);
+                bool collision_p2 = col.Collsion(p_two, ball);
+
+                ball->SetHit(collision_p1 || collision_p2);
+
+            */
 
 
             al_draw_bitmap(ball->GetImage(),ball->BallPath(p_one->GetHit(),p_two->GetHit()),50,1);//250
